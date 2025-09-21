@@ -1,0 +1,68 @@
+# =====================
+# Node modules
+# =====================
+node_modules/
+**/node_modules/
+
+# =====================
+# Logs
+# =====================
+logs
+*.log
+npm-debug.log*
+
+# =====================
+# Runtime data
+# =====================
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# =====================
+# TypeScript
+# =====================
+dist/
+build/
+*.tsbuildinfo
+
+# =====================
+# Next.js / Frontend
+# =====================
+.next/
+out/
+*.next
+.next/cache
+.next/types
+
+# Tailwind CSS cache
+tailwind.config.js
+postcss.config.js
+
+# =====================
+# Environment variables
+# =====================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =====================
+# Editor files
+# =====================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# npm lockfile (optional)
+# =====================
+package-lock.json
