@@ -1,89 +1,128 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @title Supply Chain Transactions
-/// @notice This contract stores supply chain transactions with all relevant details
+/**
+ * @title SupplyChain
+ * @notice Minimal contract to record supply-chain transactions with environmental data.
+ * @dev This contract stores transactions in memory (an on-chain array). It's intentionally
+ * simple for demonstration and testing; production use should consider indexing, storage
+ * patterns, access control, event indexing and gas optimizations.
+ */
 contract SupplyChain {
 
-    // -------------------------------
-    // Struct representing a transaction
-    // -------------------------------
-    struct Transaction {
-        string uid;               // Transaction ID (e.g., T-001)
-        string productUid;        // Product ID (e.g., P-001)
-        string country;           // Country name
-        string province;          // Province (can be empty)
-        string actorName;         // Name of the actor (person or organization)
-        uint256 timestamp;        // Unix timestamp of the transaction
-        uint256 quantity;         // Quantity involved
-        string unit;              // Unit of measure (e.g., kg)
-        string eventType;         // Event type (e.g., Harvest, Transport)
-        string actor;             // Actor ID (e.g., A-001)
-        uint8 humidity;           // Humidity percentage (e.g., 21)
-        int8 temperature;         // Temperature in Celsius
-        bool criticalEvent;       // Whether a critical event was detected
-        string transportDocRef;   // Transport document or reference
+    /**
+     * @notice Input DTO for adding a transaction
+     * @dev Used as an external memory struct so callers can construct a single argument
+     *      instead of passing a long argument list. Field types chosen for simplicity.
+     */
+    struct TransactionInput {
+        string uid; // Unique identifier for this transaction (client-provided)
+        string productUid; // Identifier for the product/batch
+        string country; // Country where the event occurred
+        string province; // Province/state where the event occurred
+        string actorName; // Human-readable actor name
+        uint256 timestamp; // POSIX timestamp (seconds) when the event occurred
+        uint256 quantity; // Quantity involved in the transaction
+        string unit; // Unit of measure for quantity (e.g., kg, L)
+        string eventType; // Semantic event type (e.g., "Harvest", "Transport")
+        string actor; // Short actor code or address string (optional)
+        uint8 humidity; // Environmental humidity (0-100)
+        int8 temperature; // Temperature in degrees (can be negative)
+        bool criticalEvent; // Flag marking whether the environmental data triggered an alert
+        string transportDocRef; // Reference to a transport document (bill of lading, etc.)
     }
 
-    // -------------------------------
-    // State variables
-    // -------------------------------
-    Transaction[] public transactions; // Array to store all transactions
+    /**
+     * @notice Nested struct used to group environmental readings
+     */
+    struct Environment {
+        uint8 humidity;
+        int8 temperature;
+        bool criticalEvent;
+    }
 
-    // -------------------------------
-    // Events
-    // -------------------------------
+    /**
+     * @notice Primary transaction record stored on-chain
+     */
+    struct Transaction {
+        string uid;
+        string productUid;
+        string country;
+        string province;
+        string actorName;
+        uint256 timestamp;
+        uint256 quantity;
+        string unit;
+        string eventType;
+        string actor;
+        Environment env; // Grouped environmental data
+        string transportDocRef;
+    }
+
+    // Public array of transactions. Marked `public` so Solidity generates a getter.
+    Transaction[] public transactions;
+
+    /**
+     * @notice Emitted when a new transaction is added
+     * @param uid Unique transaction id
+     * @param productUid Product/batch identifier
+     * @param timestamp Event timestamp
+     */
     event TransactionAdded(string uid, string productUid, uint256 timestamp);
 
-    // -------------------------------
-    // Functions
-    // -------------------------------
-
-    /// @notice Add a new transaction
-    function addTransaction(
-        string memory uid,
-        string memory productUid,
-        string memory country,
-        string memory province,
-        string memory actorName,
-        uint256 timestamp,
-        uint256 quantity,
-        string memory unit,
-        string memory eventType,
-        string memory actor,
-        uint8 humidity,
-        int8 temperature,
-        bool criticalEvent,
-        string memory transportDocRef
-    ) public {
-        Transaction memory newTx = Transaction({
-            uid: uid,
-            productUid: productUid,
-            country: country,
-            province: province,
-            actorName: actorName,
-            timestamp: timestamp,
-            quantity: quantity,
-            unit: unit,
-            eventType: eventType,
-            actor: actor,
-            humidity: humidity,
-            temperature: temperature,
-            criticalEvent: criticalEvent,
-            transportDocRef: transportDocRef
+    /**
+     * @notice Add a new transaction record
+     * @dev This function copies fields from the provided `TransactionInput` into
+     *      the on-chain `Transaction` structure and pushes it into the `transactions`
+     *      array. There is no access control in this example — any caller can add.
+     * @param input The transaction input struct containing all relevant fields
+     */
+    function addTransaction(TransactionInput memory input) public {
+        // Build the nested Environment struct from the input
+        Environment memory env = Environment({
+            humidity: input.humidity,
+            temperature: input.temperature,
+            criticalEvent: input.criticalEvent
         });
 
+        // Compose the full Transaction struct
+        Transaction memory newTx = Transaction({
+            uid: input.uid,
+            productUid: input.productUid,
+            country: input.country,
+            province: input.province,
+            actorName: input.actorName,
+            timestamp: input.timestamp,
+            quantity: input.quantity,
+            unit: input.unit,
+            eventType: input.eventType,
+            actor: input.actor,
+            env: env,
+            transportDocRef: input.transportDocRef
+        });
+
+        // Store the transaction on-chain
         transactions.push(newTx);
 
-        emit TransactionAdded(uid, productUid, timestamp);
+        // Emit an event for off-chain indexing and listeners
+        emit TransactionAdded(input.uid, input.productUid, input.timestamp);
     }
 
-    /// @notice Get total number of transactions
+    /**
+     * @notice Returns the number of stored transactions
+     * @return uint256 The current length of the transactions array
+     */
     function getTransactionCount() public view returns (uint256) {
         return transactions.length;
     }
 
-    /// @notice Get transaction by index
+    /**
+     * @notice Retrieve a transaction by array index
+     * @dev Returns the entire Transaction struct. Callers should ensure they pass
+     *      a valid index; the function will revert on out-of-bounds access.
+     * @param index Index in the transactions array
+     * @return Transaction The stored transaction at the provided index
+     */
     function getTransaction(uint256 index) public view returns (Transaction memory) {
         require(index < transactions.length, "Index out of bounds");
         return transactions[index];
