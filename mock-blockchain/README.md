@@ -1,3 +1,69 @@
+# Mock blockchain (local test environment)
+
+This folder contains a small Hardhat-based mock blockchain used for local
+development and testing of the `SupplyChain` contract. It includes two
+convenience scripts to populate and read example transactions.
+
+## Quick start
+
+1. Install dependencies (from repo root):
+
+```pwsh
+npm install
+```
+
+2. Start a local Hardhat node (recommended):
+
+```pwsh
+npx hardhat node
+```
+
+3. In another terminal, deploy contracts or ensure the `SupplyChain` contract
+   is deployed to the local node. If you used Ignition to deploy, the
+   address will be stored under `ignition/deployments/chain-31337/deployed_addresses.json`.
+
+4. Populate transactions (reads `mock-blockchain/data/transactions.json`):
+
+```pwsh
+npx hardhat run ./scripts/addTransactions.ts --network localhost
+```
+
+5. Read stored transactions:
+
+```pwsh
+npx hardhat run ./scripts/getTransactions.ts --network localhost
+```
+
+## Files of interest
+
+- `contracts/SupplyChain.sol` — the example contract used for tests.
+- `scripts/addTransactions.ts` — reads `data/transactions.json` and calls
+  `addTransaction` for each entry.
+- `scripts/getTransactions.ts` — fetches transactions from the contract and
+  prints them as JSON.
+- `ignition/` — ignition modules and deployment outputs. After an Ignition
+  deployment, addresses are available in `ignition/deployments/chain-<id>/`.
+
+## Environment variables
+
+- `RPC_URL` — custom RPC endpoint to use instead of the default `http://127.0.0.1:8545`.
+- `SUPPLYCHAIN_ADDRESS` — override the address resolution if you want to point
+  the scripts at a specific deployed contract.
+- `TRANSACTIONS_FILE` — (not implemented by default) you may modify the
+  scripts to consume this env var to point to a custom fixture.
+
+## Notes and troubleshooting
+
+- The scripts intentionally avoid depending on the `hardhat-ethers` plugin so
+  they remain usable in a variety of contexts. They read compiled artifacts
+  via `hre.artifacts` and use the standalone `ethers` library for RPC and
+  signing.
+- If `getTransactions.ts` fails with `Do not know how to serialize a BigInt`,
+  ensure numeric fields are not outside JavaScript's safe integer range or
+  change the script to stringify big integers as strings.
+
+If you'd like, I can convert these scripts into proper Hardhat tasks for a
+cleaner developer experience or add a sample `data/transactions.json` fixture.
 # Sample Hardhat 3 Beta Project (`node:test` and `viem`)
 
 This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
