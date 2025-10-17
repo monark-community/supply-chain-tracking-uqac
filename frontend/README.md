@@ -1,69 +1,36 @@
-# ChainProof Frontend
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This is the Next.js frontend for the ChainProof project.
+## Getting Started
 
-## ⚙️ Tech Stack
+First, run the development server:
 
-* Next.js
-* React
-* Tailwind CSS
-* TypeScript
-
-## 🚀 Quick Start (Docker)
-
-### Start with Docker only
-
-From the project root (`chainproof/`), run:
-
-```
-docker-compose up --build frontend
-```
-
-Frontend will be available at:
-[http://localhost:3000](http://localhost:3000)
-(Host port 3000 → Container port 3000)
-
-### Stop
-
-```
-docker-compose down
-```
-
-## 🖥️ Local Development (without Docker)
-
-### 1. Install Dependencies
-
-```
-cd frontend
-npm install
-```
-
-### 2. Run in Dev Mode
-
-```
+```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Frontend will run on:
-[http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### 3. Build for Production
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```
-npm run build
-npm start
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## 📂 File Structure
+## Learn More
 
-```
-frontend/
-├─ app/               # Next.js 13+ App Router
-│  ├─ page.tsx        # Home page
-│  └─ layout.tsx      # Root layout
-├─ public/            # Static assets
-├─ styles/            # Global styles
-├─ package.json
-├─ Dockerfile
-└─ tailwind.config.js
-```
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

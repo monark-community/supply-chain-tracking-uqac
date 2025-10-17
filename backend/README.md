@@ -55,9 +55,15 @@ npm start
 ## 📂 File Structure
 ```
 backend/
-├─ src/
-│  └─ index.ts      # Express entry point
+(project root)
+├─ .env
 ├─ package.json
-├─ Dockerfile
-└─ tsconfig.json
+├─ tsconfig.json
+└─ src/
+   ├─ server.ts
+   ├─ db.ts
+   └─ routes/
+      ├─ health.ts
+      └─ trace.ts   
+
 ```
