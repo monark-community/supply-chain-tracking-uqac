@@ -8,7 +8,7 @@ This is the Express.js backend service for the ChainProof project.
 * Node.js + Express
 * TypeScript support via tsx
 
-## 🚀 Quick Start (Docker)
+##  Quick Start (Docker)
 
 ### Start with Docker only
 
@@ -67,3 +67,5 @@ backend/
       └─ trace.ts   
 
 ```
+
+
