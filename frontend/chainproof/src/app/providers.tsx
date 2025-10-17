@@ -11,10 +11,10 @@ import {
 } from "@rainbow-me/rainbowkit"
 import "@rainbow-me/rainbowkit/styles.css"
 
-// ⚠️ Ton vrai WalletConnect Project ID
+//  Your real WalletConnect Project ID
 const config = getDefaultConfig({
   appName: "ChainProof",
-  projectId: "b270a43ee9db948a194a318af50dc096", // mets ton ID ici
+  projectId: "b270a43ee9db948a194a318af50dc096", // put your ID here
   chains: [mainnet, sepolia],
 })
 
@@ -25,7 +25,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider attribute="class" defaultTheme="dark">
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          {/*  chains ici */}
+          {/*  chains here */}
           <RainbowKitProvider theme={darkTheme()}>
             {children}
           </RainbowKitProvider>
