@@ -5,6 +5,7 @@ import swaggerJsdoc from "swagger-jsdoc";
 // Routes
 import healthRoute from "./routes/health";
 import traceRoute from "./routes/trace";
+import transactionRoute from "./routes/transaction";
 
 const app = express();
 app.use(express.json());
@@ -20,7 +21,6 @@ const swaggerOptions = {
     },
     servers: [{ url: "http://localhost:5000" }],
   },
-  // IMPORTANT : chemin des fichiers avec commentaires OpenAPI (dont health.ts)
   apis: ["./src/routes/*.ts"],
 };
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -32,6 +32,8 @@ app.get("/", (_req, res) =>
 );
 app.use("/", healthRoute);
 app.use("/", traceRoute);
+// Transaction endpoint: GET /api/transaction/:hash
+app.use("/api/transaction", transactionRoute);
 
 // --- Start ---
 const PORT = process.env.PORT || 5000;
