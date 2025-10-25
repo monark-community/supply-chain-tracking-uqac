@@ -1,0 +1,16 @@
+  {
+    "uid": "T-001",
+    "productUid": "P-001",
+    "country": "Columbia",
+    "province": "Huila",
+    "actorName": "Finca La Esperanza",
+    "timestamp": 1741403273,
+    "quantity": 1000,
+    "unit": "kg",
+    "eventType": "Harvest",
+    "actor": "A-001",
+    "humidity": 21,
+    "temperature": 18,
+    "criticalEvent": false,
+    "transportDocRef": "H-2025-01"
+  }
