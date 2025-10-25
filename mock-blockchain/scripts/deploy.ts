@@ -1,25 +1,23 @@
+// mock-blockchain/scripts/deploy.ts
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import fs from "fs";
 import path from "path";
-
-
 import dotenv from "dotenv";
-// Load environment variables from .env file
-dotenv.config();
 
-// Read RPC URL, contract address, private key from environment variables
+// Load environment variables from .env.backend (you can change to .env if needed)
+dotenv.config({ path: ".env.backend" });
+
+// --- Environment variables ---
 const RPC_URL = process.env.RPC_URL!;
 const PRIVATE_KEY = process.env.PRIVATE_KEY!;
+const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT!;
+const TENDERLY_USERNAME = process.env.TENDERLY_USERNAME!;
+const TENDERLY_AUTOMATIC_VERIFICATION =
+  process.env.TENDERLY_AUTOMATIC_VERIFICATION === "true";
 
-
-// Infos pour Tenderly verification automatique
-const TENDERLY_PROJECT = "chainproof"; // ton projet Tenderly
-const TENDERLY_USERNAME = "syphaxlch"; // ton username Tenderly
-const TENDERLY_AUTOMATIC_VERIFICATION = true;
-
-// --- Wallet client pour signer les transactions ---
+// --- Create wallet client for signing and deploying transactions ---
 const walletClient = createWalletClient({
   account: privateKeyToAccount(PRIVATE_KEY as `0x${string}`),
   chain: sepolia,
@@ -28,32 +26,36 @@ const walletClient = createWalletClient({
 
 (async () => {
   try {
-    // Charge l'artefact compilé du contrat
+    // --- Load the compiled contract artifact ---
     const contractJson = JSON.parse(
       fs.readFileSync(
-        path.join(__dirname, "../artifacts/contracts/SupplyChain.sol/SupplyChain.json"),
+        path.join(
+          __dirname,
+          "../artifacts/contracts/SupplyChain.sol/SupplyChain.json"
+        ),
         "utf8"
       )
     );
 
-    // Déploiement
+    // --- Deploy the contract to the blockchain ---
     const deployed = await walletClient.deployContract({
       abi: contractJson.abi,
       bytecode: contractJson.bytecode,
-      args: [], // constructeur
+      args: [], // constructor arguments (if any)
     });
 
-    console.log("✅ Contract deployed at:", deployed);
+    console.log(" Contract deployed at:", deployed);
 
+    // --- Optional: log Tenderly integration info ---
     if (TENDERLY_AUTOMATIC_VERIFICATION) {
       console.log(
-        `🔹 Tenderly automatic verification enabled for project "${TENDERLY_PROJECT}" and user "${TENDERLY_USERNAME}"`
+        `🔹 Tenderly automatic verification enabled for project "${TENDERLY_PROJECT}" and user "${TENDERLY_USERNAME}".`
       );
       console.log(
-        "You should see your contract source automatically linked in your Tenderly dashboard."
+        "Once deployed, your contract should appear automatically in your Tenderly dashboard."
       );
     }
   } catch (error) {
-    console.error("❌ Deployment failed:", error);
+    console.error(" Deployment failed:", error);
   }
 })();
