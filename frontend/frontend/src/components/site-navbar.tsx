@@ -1,12 +1,9 @@
 "use client"
-
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { ConnectButton } from "@rainbow-me/rainbowkit"
 
 export function SiteNavbar() {
-  const router = useRouter()
-
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-bg/60 backdrop-blur">
       <div className="container h-14 flex items-center justify-between">
@@ -16,18 +13,18 @@ export function SiteNavbar() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link href="/features" className="hover:underline">Features</Link>
-          <Link href="/how-it-works" className="hover:underline">How It Works</Link>
-          <Link href="/scan-qr" className="hover:underline">Scan QR</Link>
+          <Link href="/features">Features</Link>
+          <Link href="/how-it-works">How It Works</Link>
+          <Link href="/scan-qr">Scan QR</Link>
+          <Link href="/dashboard">Dashboard</Link>
+          
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button
-            className="h-9"
-            onClick={() => router.push("/auth")}
-          >
-            Login
+        <div className="flex items-center gap-3">
+          <Button asChild variant="secondary" className="hidden sm:inline-flex">
+            <Link href="/about">Learn More</Link>
           </Button>
+        <ConnectButton />
         </div>
       </div>
     </header>

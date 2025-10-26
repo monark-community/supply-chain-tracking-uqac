@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  backend:
+    # Build the backend Docker image
+    build: ./backend
+    # Map container port 4000 to host port 4000
+    ports:
+      - "5000:5000"
+    # Mount backend source code for hot-reload
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+
+  frontend:
+    # Build the frontend Docker image
+    build: ./frontend
+    # Map container port 3000 to host port 3000
+    ports:
+      - "3000:3000"
+    # Mount frontend source code for hot-reload
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
