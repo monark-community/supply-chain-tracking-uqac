@@ -1,5 +1,4 @@
-
-import { Pool } from "pg";
+import { Pool, QueryResultRow } from "pg";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -9,10 +8,16 @@ export const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  ssl: false, 
 });
 
-export async function ping() {
-  const r = await pool.query("SELECT 1 AS ok");
-  return r.rows[0].ok === 1;
+/**
+ * Helper de requête typé.
+ * T doit étendre QueryResultRow (contrainte attendue par pg).
+ */
+export async function q<T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params?: any[]
+): Promise<T[]> {
+  const { rows } = await pool.query<T>(text, params);
+  return rows;
 }

@@ -5,6 +5,9 @@ import swaggerJsdoc from "swagger-jsdoc";
 // Routes
 import healthRoute from "./routes/health";
 import traceRoute from "./routes/trace";
+import productsRoute from "./routes/products";
+import actorsRoute from "./routes/actors";
+
 
 const app = express();
 app.use(express.json());
@@ -31,6 +34,9 @@ app.get("/", (_req, res) =>
   res.send("Welcome to the ChainProof backend service!")
 );
 app.use("/", healthRoute);
+app.use("/", traceRoute);
+app.use("/", productsRoute);
+app.use("/", actorsRoute);
 app.use("/", traceRoute);
 
 // --- Start ---
