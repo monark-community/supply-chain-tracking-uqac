@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Truck,
@@ -11,17 +11,18 @@ import {
   QrCode,
   BarChart3,
   Settings,
-} from "lucide-react"
-import { useProducts, ProductsProvider } from "@/context/products-context"
+} from "lucide-react";
+import { useProducts, ProductsProvider } from "@/context/products-context";
+import { UserProvider } from "@auth0/nextjs-auth0/client"; // ← ajouter
 
 function Sidebar() {
-  const pathname = usePathname()
-  const { products } = useProducts()
+  const pathname = usePathname();
+  const { products } = useProducts();
 
-  const totalProducts = products.length
-  const inTransit = products.filter((p) => p.status === "In Transit").length
-  const delivered = products.filter((p) => p.status === "Delivered").length
-  const qrScans = totalProducts * 5 
+  const totalProducts = products.length;
+  const inTransit = products.filter((p) => p.status === "In Transit").length;
+  const delivered = products.filter((p) => p.status === "Delivered").length;
+  const qrScans = totalProducts * 5;
 
   const menuItems = [
     { name: "Producer", href: "/dashboard", icon: Factory, badge: totalProducts },
@@ -30,7 +31,7 @@ function Sidebar() {
     { name: "QR Codes", href: "/scan-qr", icon: QrCode, badge: qrScans },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "Settings", href: "/settings", icon: Settings },
-  ]
+  ];
 
   return (
     <aside className="w-64 bg-gray-950/70 border-r border-white/10 p-6">
@@ -41,7 +42,7 @@ function Sidebar() {
 
       <nav className="flex flex-col gap-2">
         {menuItems.map((item) => {
-          const active = pathname === item.href
+          const active = pathname === item.href;
           return (
             <Link
               key={item.name}
@@ -68,24 +69,26 @@ function Sidebar() {
                 </span>
               )}
             </Link>
-          )
+          );
         })}
       </nav>
     </aside>
-  )
+  );
 }
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <ProductsProvider>
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-[#0b0f17] to-black text-white">
-        <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto">{children}</main>
-      </div>
-    </ProductsProvider>
-  )
+    <UserProvider> {/* ← envelopper le dashboard avec Auth0 */}
+      <ProductsProvider>
+        <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-[#0b0f17] to-black text-white">
+          <Sidebar />
+          <main className="flex-1 p-8 overflow-y-auto">{children}</main>
+        </div>
+      </ProductsProvider>
+    </UserProvider>
+  );
 }
