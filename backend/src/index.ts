@@ -5,6 +5,9 @@ import swaggerJsdoc from "swagger-jsdoc";
 // Routes
 import healthRoute from "./routes/health";
 import traceRoute from "./routes/trace";
+import productsRoute from "./routes/products";
+import actorsRoute from "./routes/actors";
+
 import transactionRoute from "./routes/transaction";
 
 const app = express();
@@ -32,6 +35,9 @@ app.get("/", (_req, res) =>
 );
 app.use("/", healthRoute);
 app.use("/", traceRoute);
+app.use("/", productsRoute);
+app.use("/", actorsRoute);
+
 // Transaction endpoint: GET /api/transaction/:hash
 app.use("/api/transaction", transactionRoute);
 
