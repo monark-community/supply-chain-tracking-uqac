@@ -1,9 +1,43 @@
+// src/components/site-navbar.tsx
 "use client"
+
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { useEffect, useState } from "react"
+import LoginButton from './LoginButton';
+
+export default function AuthPage() {
+  return (
+    <div>
+      <h1>Se connecter</h1>
+      <LoginButton />
+    </div>
+  );
+}
+
+type Me = { user?: { name?: string; email?: string } } | null
 
 export function SiteNavbar() {
+  const [me, setMe] = useState<Me>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch("/api/auth/me", { cache: "no-store" })
+        const data = res.ok ? await res.json() : null
+        if (!cancelled) setMe(data)
+      } catch {
+        if (!cancelled) setMe(null)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  const isAuth = !!me?.user
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-bg/60 backdrop-blur">
       <div className="container h-14 flex items-center justify-between">
@@ -16,16 +50,23 @@ export function SiteNavbar() {
           <Link href="/features">Features</Link>
           <Link href="/how-it-works">How It Works</Link>
           <Link href="/scan-qr">Scan QR</Link>
-          <Link href="/dashboard">Dashboard</Link>
-          
+          {!loading && !isAuth && (
+            <Link href="/auth" className="px-3 py-1 rounded-md border border-white/15 hover:bg-white/10">
+              Login
+            </Link>
+          )}
+          {!loading && isAuth && (
+            <>
+              <Link href="/dashboard">Dashboard</Link>
+              <a
+                href="/api/auth/logout"
+                className="px-3 py-1 rounded-md border border-white/15 hover:bg-white/10"
+              >
+                Logout
+              </a>
+            </>
+          )}
         </nav>
-
-        <div className="flex items-center gap-3">
-          <Button asChild variant="secondary" className="hidden sm:inline-flex">
-            <Link href="/about">Learn More</Link>
-          </Button>
-        <ConnectButton />
-        </div>
       </div>
     </header>
   )
