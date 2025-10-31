@@ -1,179 +1,142 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useRouter } from "next/navigation";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useProducts, Product } from "@/context/products-context";
 
-type ProductStatus = "Produced" | "In Transit" | "Delivered";
-
-interface Product {
-  id: string;
-  name: string;
-  origin: string;
-  certification: string;
-  status: ProductStatus;
-  location: string;
-  time: string;
+// Define the shape of a transaction object
+interface Transaction {
+  uid: string;
+  productUid: string;
+  country: string;
+  province: string;
+  actorName: string;
+  timestamp: string;
+  quantity: string | number;
+  unit: string;
+  eventType: string;
+  actor: string;
+  humidity: number;
+  temperature: number;
+  criticalEvent: boolean;
+  transportDocRef: string;
 }
 
 export default function DashboardClient() {
+  // Get authenticated user info from Auth0
   const { user, isLoading } = useUser();
   const router = useRouter();
 
-  // 🔹 Redirection si non connecté
-  if (!isLoading && !user) {
-    router.push("/api/auth/login?returnTo=/dashboard");
-    return null;
-  }
+  // Access products context
+  const { products, setProducts } = useProducts();
 
-  // Exemple produits
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: "PRD-001",
-      name: "Organic Coffee Beans",
-      origin: "Brazil",
-      certification: "Fair Trade",
-      status: "In Transit",
-      location: "Distribution Center A",
-      time: "2 hours ago",
-    },
-    {
-      id: "PRD-002",
-      name: "Premium Olive Oil",
-      origin: "Italy",
-      certification: "Organic",
-      status: "Delivered",
-      location: "Retail Store #42",
-      time: "1 day ago",
-    },
-    {
-      id: "PRD-003",
-      name: "Artisan Cheese",
-      origin: "France",
-      certification: "AOP",
-      status: "Produced",
-      location: "Farm Location",
-      time: "3 hours ago",
-    },
-  ]);
+  // Local state for loading and transactions
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [transactionsMap, setTransactionsMap] = useState<Record<string, Transaction[]>>({});
+  const [loadingTx, setLoadingTx] = useState<Record<string, boolean>>({});
 
-  const [name, setName] = useState("");
-  const [origin, setOrigin] = useState("");
-  const [certification, setCertification] = useState("");
-
-  function handleCreateProduct() {
-    if (!name || !origin || !certification) return;
-
-    const newProduct: Product = {
-      id: `PRD-${String(products.length + 1).padStart(3, "0")}`,
-      name,
-      origin,
-      certification,
-      status: "Produced",
-      location: origin,
-      time: "Just now",
+  // Fetch products from backend on component mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/products?limit=50&offset=0");
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const data: Product[] = await res.json();
+        setProducts(data); // Update products in context
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingProducts(false); // Mark products as loaded
+      }
     };
+    fetchProducts();
+  }, [setProducts]);
 
-    setProducts((prev) => [newProduct, ...prev]);
-    setName("");
-    setOrigin("");
-    setCertification("");
-  }
+  // Fetch transactions for a specific product
+  const fetchTransactions = async (productId: string) => {
+    setLoadingTx((prev) => ({ ...prev, [productId]: true })); // Mark as loading
+    try {
+      const res = await fetch(`http://localhost:5000/api/products/${productId}/transactions`);
+      if (!res.ok) throw new Error("Failed to fetch transactions");
+      const data: Transaction[] = await res.json();
+      setTransactionsMap((prev) => ({ ...prev, [productId]: data })); // Save transactions
+    } catch (err) {
+      console.error(err);
+      setTransactionsMap((prev) => ({ ...prev, [productId]: [] })); // Fallback to empty array
+    } finally {
+      setLoadingTx((prev) => ({ ...prev, [productId]: false })); // Mark as done loading
+    }
+  };
 
-  function updateProductStatus(id: string, newStatus: ProductStatus) {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
-    );
-  }
-
-  const totalProducts = products.length;
-  const inTransit = products.filter((p) => p.status === "In Transit").length;
-  const delivered = products.filter((p) => p.status === "Delivered").length;
-  const qrScans = totalProducts * 5; // mock
+  // Show loading message if user info or products are still loading
+  if (isLoading || loadingProducts) return <p className="text-white">Loading...</p>;
 
   return (
     <section className="container py-10">
-      {/* 🔹 Infos utilisateur */}
-      {user && (
-        <div className="flex items-center gap-4 mb-6">
-          {user.picture && (
-            <img src={user.picture} alt="Avatar" className="w-12 h-12 rounded-full" />
-          )}
-          <div>
-            <div className="font-semibold text-lg">{user.name}</div>
-            <div className="text-sm text-white/70">{user.email}</div>
-          </div>
+      <h2 className="text-3xl font-bold mb-6 text-white">
+        {user ? `Welcome, ${user.name}` : "Product Dashboard"}
+      </h2>
+
+      {/* If user is not logged in */}
+      {!user ? (
+        <div className="text-center mt-10">
+          <p className="text-white/80 mb-4">Please log in to view transactions.</p>
           <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => router.push("/api/auth/logout")}
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => router.push("/api/auth/login?returnTo=/dashboard")}
           >
-            Déconnexion
+            Log In
           </Button>
         </div>
-      )}
+      ) : (
+        // If user is logged in, show product list and transaction buttons
+        <div className="flex flex-col gap-4">
+          {products.map((product) => (
+            <div key={product.id} className="bg-gray-800/50 p-4 rounded-lg">
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="font-semibold text-white">{product.name}</div>
+                  <div className="text-sm text-white/70">
+                    {product.origin || product.category_name} — {product.certification || product.variety}
+                  </div>
+                </div>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => fetchTransactions(product.id)}
+                  disabled={loadingTx[product.id]} // Disable while loading
+                >
+                  {loadingTx[product.id] ? "Loading..." : "Transactions"}
+                </Button>
+              </div>
 
-      {/* Header + ajout produit */}
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold">Dashboard</h2>
+              {/* Transactions list if available */}
+              {transactionsMap[product.id] && transactionsMap[product.id].length > 0 && (
+                <div className="mt-4 bg-gray-700/40 p-3 rounded-md text-white text-sm">
+                  {transactionsMap[product.id].map((tx) => (
+                    <div key={tx.uid} className="border-b border-gray-600 py-2">
+                      <div><strong>Event:</strong> {tx.eventType}</div>
+                      <div><strong>Actor:</strong> {tx.actorName} ({tx.actor})</div>
+                      <div><strong>Location:</strong> {tx.country}, {tx.province}</div>
+                      <div><strong>Quantity:</strong> {tx.quantity} {tx.unit}</div>
+                      <div><strong>Timestamp:</strong> {new Date(Number(tx.timestamp) * 1000).toLocaleString()}</div>
+                      <div><strong>Temp:</strong> {tx.temperature}°C, <strong>Humidity:</strong> {tx.humidity}%</div>
+                      {tx.transportDocRef && <div><strong>Transport Doc:</strong> {tx.transportDocRef}</div>}
+                      {tx.criticalEvent && <div className="text-red-400">Critical Event!</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-green-500 to-emerald-600 hover:opacity-90 transition">
-              + Add New Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-card text-white border border-white/10">
-            <DialogHeader>
-              <DialogTitle>Add a New Product</DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-3 mt-4">
-              <Input
-                placeholder="Product Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                placeholder="Origin"
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-              />
-              <Input
-                placeholder="Certification"
-                value={certification}
-                onChange={(e) => setCertification(e.target.value)}
-              />
-              <Button
-                onClick={handleCreateProduct}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 transition"
-              >
-                Save Product
-              </Button>
+              {/* Message if no transactions found */}
+              {transactionsMap[product.id] && transactionsMap[product.id].length === 0 && (
+                <div className="mt-2 text-white/70 text-sm">No transactions found.</div>
+              )}
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Stats + produits récents */}
-      {/* ...reste du code inchangé... */}
+          ))}
+        </div>
+      )}
     </section>
   );
 }
