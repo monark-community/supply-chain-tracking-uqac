@@ -1,14 +1,16 @@
+// src/routes/productTransactions.ts
 import express from "express";
 import { decodeFunctionData } from "viem";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
+import { q } from "../db";
 
 dotenv.config();
 
 const router = express.Router();
 
-// Load contract ABI (used to decode transaction input data)
+// Load contract ABI
 const contractPath = path.resolve(
   __dirname,
   "../../../mock-blockchain/artifacts/contracts/SupplyChain.sol/SupplyChain.json"
@@ -18,9 +20,7 @@ const contractJson = JSON.parse(fs.readFileSync(contractPath, "utf-8"));
 // Blockchain RPC endpoint
 const RPC_URL = process.env.RPC_URL as string;
 
-/**
- * Convert all BigInts to strings so JSON.stringify doesn't break.
- */
+// Convert BigInt to string for JSON
 function convertBigInts(obj: any): any {
   if (typeof obj === "bigint") return obj.toString();
   if (Array.isArray(obj)) return obj.map(convertBigInts);
@@ -32,9 +32,7 @@ function convertBigInts(obj: any): any {
   return obj;
 }
 
-/**
- * Fetch a blockchain transaction by its hash using JSON-RPC.
- */
+// Fetch blockchain transaction by hash
 async function getTransaction(hash: string) {
   const body = {
     jsonrpc: "2.0",
@@ -48,62 +46,67 @@ async function getTransaction(hash: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+
   const json = await res.json();
   return json.result;
 }
 
 /**
  * @openapi
- * /api/transaction/{hash}:
+ * /api/products/{productId}/transactions:
  *   get:
- *     summary: Decode blockchain transaction input data
- *     description: Fetches a transaction by hash and decodes its input to return readable arguments.
+ *     summary: Get all blockchain transactions for a product
+ *     description: Fetches all transactions linked to a product ID and decodes their input data.
  *     tags:
- *       - Transaction
+ *       - Product Transactions
  *     parameters:
  *       - in: path
- *         name: hash
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
- *         description: Blockchain transaction hash (0x...)
+ *         description: ID of the product
  *     responses:
  *       200:
- *         description: Successfully decoded transaction arguments
+ *         description: List of decoded transaction arguments
  *         content:
  *           application/json:
  *             example:
  *               [
- *                 {
- *                   "uid": "T-001",
- *                   "productUid": "P-001",
- *                   "country": "Columbia"
- *                 }
+ *                 { "uid": "T-001", "productUid": "P-001", "country": "Columbia" }
  *               ]
  *       404:
- *         description: Transaction not found or has no input data
+ *         description: No transactions found for this product
  *       500:
  *         description: Server or decoding error
  */
-router.get("/:hash", async (req, res) => {
+router.get("/:productId/transactions", async (req, res) => {
+  const { productId } = req.params;
+
   try {
-    const tx = await getTransaction(req.params.hash);
+    const rows = await q(
+      `SELECT transaction_id FROM product_transactions WHERE product_id = $1`,
+      [productId]
+    );
 
-    if (!tx || !tx.input || tx.input === "0x") {
-      return res.status(404).json({ error: "Transaction not found or has no input data" });
+    if (!rows.length)
+      return res.status(404).json({ error: "No transactions found for this product" });
+
+    const decodedTransactions = [];
+    for (const row of rows) {
+      const tx = await getTransaction(row.transaction_id);
+      if (!tx || !tx.input || tx.input === "0x") continue;
+
+      const decoded = decodeFunctionData({
+        abi: contractJson.abi,
+        data: tx.input,
+      });
+
+      decodedTransactions.push(convertBigInts(decoded.args));
     }
-
-    const decoded = decodeFunctionData({
-      abi: contractJson.abi,
-      data: tx.input,
-    });
-
-    const safeDecoded = convertBigInts(decoded);
-
-    //  Return only the decoded args (array of objects)
-    res.json(safeDecoded.args);
+    res.json(decodedTransactions.flat());
   } catch (err: any) {
-    console.error("Decode error:", err);
+    console.error("Error fetching product transactions:", err);
     res.status(500).json({ error: err.message });
   }
 });

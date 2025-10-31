@@ -10,7 +10,7 @@ export default function LoginButton() {
 
   return (
     <Link
-      href="/api/auth/login"
+      href="/api/auth/logout"
       onClick={handleClick}
       style={{
         display: "inline-block",
@@ -21,7 +21,7 @@ export default function LoginButton() {
         textDecoration: "none",
       }}
     >
-      Login
+      Logout
     </Link>
   );
 }
