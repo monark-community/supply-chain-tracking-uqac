@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useProducts, Product } from "@/context/products-context";
 
+// Define the shape of a transaction object
 interface Transaction {
   uid: string;
   productUid: string;
@@ -24,47 +25,52 @@ interface Transaction {
 }
 
 export default function DashboardClient() {
+  // Get authenticated user info from Auth0
   const { user, isLoading } = useUser();
   const router = useRouter();
+
+  // Access products context
   const { products, setProducts } = useProducts();
 
+  // Local state for loading and transactions
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [transactionsMap, setTransactionsMap] = useState<Record<string, Transaction[]>>({});
   const [loadingTx, setLoadingTx] = useState<Record<string, boolean>>({});
 
-  // Fetch products from backend
+  // Fetch products from backend on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/products?limit=50&offset=0");
         if (!res.ok) throw new Error("Failed to fetch products");
         const data: Product[] = await res.json();
-        setProducts(data); // update context
+        setProducts(data); // Update products in context
       } catch (err) {
         console.error(err);
       } finally {
-        setLoadingProducts(false);
+        setLoadingProducts(false); // Mark products as loaded
       }
     };
     fetchProducts();
   }, [setProducts]);
 
-  // Fetch transactions for a product
+  // Fetch transactions for a specific product
   const fetchTransactions = async (productId: string) => {
-    setLoadingTx((prev) => ({ ...prev, [productId]: true }));
+    setLoadingTx((prev) => ({ ...prev, [productId]: true })); // Mark as loading
     try {
       const res = await fetch(`http://localhost:5000/api/products/${productId}/transactions`);
       if (!res.ok) throw new Error("Failed to fetch transactions");
       const data: Transaction[] = await res.json();
-      setTransactionsMap((prev) => ({ ...prev, [productId]: data }));
+      setTransactionsMap((prev) => ({ ...prev, [productId]: data })); // Save transactions
     } catch (err) {
       console.error(err);
-      setTransactionsMap((prev) => ({ ...prev, [productId]: [] }));
+      setTransactionsMap((prev) => ({ ...prev, [productId]: [] })); // Fallback to empty array
     } finally {
-      setLoadingTx((prev) => ({ ...prev, [productId]: false }));
+      setLoadingTx((prev) => ({ ...prev, [productId]: false })); // Mark as done loading
     }
   };
 
+  // Show loading message if user info or products are still loading
   if (isLoading || loadingProducts) return <p className="text-white">Loading...</p>;
 
   return (
@@ -73,6 +79,7 @@ export default function DashboardClient() {
         {user ? `Welcome, ${user.name}` : "Product Dashboard"}
       </h2>
 
+      {/* If user is not logged in */}
       {!user ? (
         <div className="text-center mt-10">
           <p className="text-white/80 mb-4">Please log in to view transactions.</p>
@@ -84,6 +91,7 @@ export default function DashboardClient() {
           </Button>
         </div>
       ) : (
+        // If user is logged in, show product list and transaction buttons
         <div className="flex flex-col gap-4">
           {products.map((product) => (
             <div key={product.id} className="bg-gray-800/50 p-4 rounded-lg">
@@ -97,13 +105,13 @@ export default function DashboardClient() {
                 <Button
                   className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => fetchTransactions(product.id)}
-                  disabled={loadingTx[product.id]}
+                  disabled={loadingTx[product.id]} // Disable while loading
                 >
                   {loadingTx[product.id] ? "Loading..." : "Transactions"}
                 </Button>
               </div>
 
-              {/* Transactions list */}
+              {/* Transactions list if available */}
               {transactionsMap[product.id] && transactionsMap[product.id].length > 0 && (
                 <div className="mt-4 bg-gray-700/40 p-3 rounded-md text-white text-sm">
                   {transactionsMap[product.id].map((tx) => (
@@ -121,7 +129,7 @@ export default function DashboardClient() {
                 </div>
               )}
 
-              {/* No transactions */}
+              {/* Message if no transactions found */}
               {transactionsMap[product.id] && transactionsMap[product.id].length === 0 && (
                 <div className="mt-2 text-white/70 text-sm">No transactions found.</div>
               )}
