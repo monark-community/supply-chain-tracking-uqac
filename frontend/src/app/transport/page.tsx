@@ -5,22 +5,31 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
+// TransportPage component allows updating and viewing product transport info
 export default function TransportPage() {
-  const [productId, setProductId] = useState("")
-  const [location, setLocation] = useState("")
-  const [temperature, setTemperature] = useState("")
-  const [updates, setUpdates] = useState<any[]>([])
+  // State variables for input fields
+  const [productId, setProductId] = useState("") // Product ID input
+  const [location, setLocation] = useState("") // Current location input
+  const [temperature, setTemperature] = useState("") // Temperature input
+  const [updates, setUpdates] = useState<any[]>([]) // List of transport updates
 
+  // Handle adding a new transport update
   function handleUpdate() {
-    if (!productId || !location || !temperature) return
+    if (!productId || !location || !temperature) return // Validate inputs
+
+    // Create a new update object
     const update = {
-      id: updates.length + 1,
+      id: updates.length + 1, // Unique ID for the update
       productId,
       location,
       temperature,
-      status: "In Transit",
+      status: "In Transit", // Default status
     }
+
+    // Add new update to state
     setUpdates([...updates, update])
+
+    // Clear input fields
     setProductId("")
     setLocation("")
     setTemperature("")
@@ -28,13 +37,16 @@ export default function TransportPage() {
 
   return (
     <section className="container py-12">
+      {/* Page heading */}
       <h2 className="text-3xl font-bold mb-8">Transport Dashboard</h2>
 
+      {/* Card for adding new transport update */}
       <Card className="max-w-lg mb-10">
         <CardHeader>
           <CardTitle>Update Product Transport</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
+          {/* Input fields */}
           <Input
             placeholder="Product ID"
             value={productId}
@@ -50,16 +62,17 @@ export default function TransportPage() {
             value={temperature}
             onChange={(e) => setTemperature(e.target.value)}
           />
+          {/* Button to submit transport update */}
           <Button
-  className="bg-gradient-to-r from-sky-500 to-emerald-400 hover:opacity-90 transition"
-  onClick={handleUpdate}
->
-  Update
-</Button>
-
+            className="bg-gradient-to-r from-sky-500 to-emerald-400 hover:opacity-90 transition"
+            onClick={handleUpdate}
+          >
+            Update
+          </Button>
         </CardContent>
       </Card>
 
+      {/* Display transport history */}
       <h3 className="text-xl font-semibold mb-4">Transport History</h3>
       <div className="grid gap-4">
         {updates.map((u) => (
