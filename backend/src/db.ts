@@ -1,16 +1,17 @@
 import { Pool, QueryResultRow } from "pg";
 import dotenv from "dotenv";
+import path from "path";
 
-// Load environment variables from .env file
-dotenv.config();
+// Load environment variables from the parent folder's .env file
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 // Create a new PostgreSQL connection pool using environment variables
 export const pool = new Pool({
-  host: process.env.DB_HOST,              // Database host
-  port: Number(process.env.DB_PORT || 5432), // Database port, default to 5432
-  database: process.env.DB_NAME,          // Database name
-  user: process.env.DB_USER,              // Database username
-  password: process.env.DB_PASS,          // Database password
+  host: process.env.DB_HOST,                  // Database host
+  port: Number(process.env.DB_PORT_OUT || 5432),  // Database port (default 5432)
+  database: process.env.DB_NAME,              // Database name
+  user: process.env.DB_USER,                  // Database username
+  password: process.env.DB_PASS,              // Database password
 });
 
 /**

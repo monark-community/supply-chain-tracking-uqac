@@ -11,7 +11,7 @@ const router = express.Router();
 // Load contract ABI (used to decode transaction input data)
 const contractPath = path.resolve(
   __dirname,
-  "../../../mock-blockchain/artifacts/contracts/SupplyChain.sol/SupplyChain.json"
+  "../../contracts/SupplyChain.json"
 );
 const contractJson = JSON.parse(fs.readFileSync(contractPath, "utf-8"));
 

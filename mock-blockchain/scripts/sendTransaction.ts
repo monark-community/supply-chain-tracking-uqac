@@ -6,7 +6,7 @@ import path from "path";
 
 import dotenv from "dotenv";
 // Load environment variables from .env file
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 // Read RPC URL, contract address, private key from environment variables
 const RPC_URL = process.env.RPC_URL!;

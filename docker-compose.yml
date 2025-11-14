@@ -1,28 +1,60 @@
 version: '3.9'
 
 services:
-  backend:
-    # Build the backend Docker image
-    build: ./backend
-    # Map container port 4000 to host port 4000
+  # PostgreSQL Database (starts first)
+  db:
+    image: postgres:18
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
     ports:
-      - "5000:5000"
-    # Mount backend source code for hot-reload
+      - "${DB_PORT_OUT}:${DB_PORT_IN}"  # Example: 5432:5432
+    volumes:
+      # Mount initialization scripts (like coffee.sql)
+      - ./db-init:/docker-entrypoint-initdb.d
+    # Expose container name for internal connection
+    container_name: postgres-db
+
+  # Backend (Node.js / Express)
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "5000:5000"  # Access backend at localhost:5000
+    env_file:
+      - .env
+    depends_on:
+      - db  # Ensure DB container starts first
     volumes:
       - ./backend:/app
       - /app/node_modules
+    container_name: backend-service
+
+  # Frontend (React)
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "3000:3000"  # Access frontend at localhost:3000
     environment:
       NODE_ENV: development
-
-  frontend:
-    # Build the frontend Docker image
-    build: ./frontend
-    # Map container port 3000 to host port 3000
-    ports:
-      - "3000:3000"
-    # Mount frontend source code for hot-reload
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    environment:
-      NODE_ENV: development
+    container_name: frontend-service
+
+  # PGAdmin for managing the PostgreSQL database
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${PGADMIN_PORT_OUT}:${PGADMIN_PORT_IN}"  # Example: 8080:80
+    container_name: pgadmin
+    depends_on:
+      - db
