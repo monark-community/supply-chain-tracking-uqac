@@ -10,6 +10,11 @@ import productsRoute from "./routes/products";
 import actorsRoute from "./routes/actors";
 import productTransactionsRoute from "./routes/productTransactions";
 import transactionRoute from "./routes/transaction";
+import contactsRoute from "./routes/contacts";
+import productCategoriesRoute from "./routes/productCategories";
+import actorCategoriesRoute from "./routes/actorCategories";
+import unitsRoute from "./routes/units";
+import productTransactionsAdminRoute from "./routes/productTransactionsAdmin";
 
 // Create an Express application
 const app = express();
@@ -56,8 +61,23 @@ app.use("/", productsRoute);
 // Actor-related routes
 app.use("/", actorsRoute);
 
+// Contacts
+app.use("/", contactsRoute);
+
+// Product categories
+app.use("/", productCategoriesRoute);
+
+// Actor categories
+app.use("/", actorCategoriesRoute);
+
+// Units
+app.use("/", unitsRoute);
+
 // Product transaction routes
 app.use("/api/products", productTransactionsRoute);
+
+// Admin product transactions listing
+app.use("/", productTransactionsAdminRoute);
 
 // Transaction routes
 app.use("/api/transaction", transactionRoute);

@@ -3,7 +3,7 @@
 import { useUser } from "@auth0/nextjs-auth0/client"; // Auth0 hook for user info
 import { useRouter } from "next/navigation"; // Next.js router for navigation
 import { useEffect } from "react";
-import DashboardClient from "./_client"; // The main dashboard component
+import DashboardClient from "@/components/admin/dashboard-client"; // The main dashboard component
 
 export default function DashboardPage() {
   const { user, isLoading } = useUser(); // Get current user and loading state
@@ -12,7 +12,7 @@ export default function DashboardPage() {
   // Redirect to login if user is not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/api/auth/login?returnTo=/dashboard"); // Redirect to login page
+      router.push("/api/auth/login?returnTo=/admin"); // Redirect to login page
     }
   }, [user, isLoading, router]);
 
@@ -20,6 +20,11 @@ export default function DashboardPage() {
   if (isLoading || !user) 
     return <p className="text-center mt-20 text-gray-400">Loading...</p>;
 
-  // Render the dashboard once user is authenticated
-  return <DashboardClient />;
+  // Redirect old dashboard route to new admin route
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace('/admin');
+    }
+  }, [user, isLoading, router]);
+  return <p className="text-center mt-20 text-gray-400">Redirecting to admin...</p>;
 }

@@ -12,7 +12,7 @@ const steps = [
     title: "Producer",
     desc: "Create product record with origin & certifications.",
     icon: <Factory className="h-8 w-8 text-emerald-400" />,
-    href: "/dashboard",
+    href: "/admin",
   },
   {
     id: "02",
