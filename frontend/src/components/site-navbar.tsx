@@ -57,7 +57,7 @@ export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
           {!dashboard && (
             <>
               {/* Public site links */}
-              <Link href="/features">Features</Link>
+              <Link href="#features">Features</Link>
               <Link href="/how-it-works">How It Works</Link>
               <Link href="/scan-qr">Scan QR</Link>
               {!isAuth && <LoginButton />} {/* Show login if not authenticated */}
