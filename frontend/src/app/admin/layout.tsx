@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Factory, Users, Layers, FileText, Box, Database } from "lucide-react";
 import { useProducts, ProductsProvider } from "@/context/products-context";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { UserProvider, useUser } from "@auth0/nextjs-auth0/client";
+import LogoutButton from "@/components/LogoutButton";
+import { useEffect } from "react";
 
 function Sidebar() {
   const pathname = usePathname();
@@ -24,8 +26,8 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-white/10 p-6">
-      <nav className="flex flex-col gap-2">
+    <aside className="w-64 border-r border-white/10 p-6 flex flex-col">
+      <nav className="flex flex-col gap-2 flex-1">
         {menuItems.map((item) => {
           const active = pathname === item.href;
           return (
@@ -52,7 +54,40 @@ function Sidebar() {
           );
         })}
       </nav>
+      <div className="mt-4 pt-4 border-t border-white/10">
+        <LogoutButton />
+      </div>
     </aside>
+  );
+}
+
+function AdminContent({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/api/auth/login?returnTo=/admin");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-[#0b0f17] to-black text-white">
+        <p className="text-gray-400">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-[#0b0f17] to-black text-white">
+      <Sidebar />
+      <main className="flex-1 p-8 overflow-y-auto">{children}</main>
+    </div>
   );
 }
 
@@ -60,10 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <UserProvider>
       <ProductsProvider>
-        <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-[#0b0f17] to-black text-white">
-          <Sidebar />
-          <main className="flex-1 p-8 overflow-y-auto">{children}</main>
-        </div>
+        <AdminContent>{children}</AdminContent>
       </ProductsProvider>
     </UserProvider>
   );

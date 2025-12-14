@@ -39,7 +39,7 @@ export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
     };
   }, []);
 
-  const isAuth = !!me?.email; // Boolean to check if user is logged in
+  const isAuth = !!me?.user?.email; // Boolean to check if user is logged in
 
   if (loading) return null; // Do not render navbar while loading
 
@@ -60,11 +60,8 @@ export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
               <Link href="#features">Features</Link>
               <Link href="/how-it-works">How It Works</Link>
               <Link href="/scan-qr">Scan QR</Link>
-              {!isAuth && <LoginButton />} {/* Show login if not authenticated */}
             </>
           )}
-
-          {isAuth && <LogoutButton />} {/* Show logout if authenticated */}
         </nav>
       </div>
     </header>
