@@ -106,7 +106,6 @@ router.patch("/products/:id", async (req: Request, res: Response) => {
     if (!updated) return res.status(404).json({ error: "Product not found" });
     res.json(updated);
   } catch (err: any) {
-    console.error("Error updating product quantity:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -151,7 +150,6 @@ router.post("/products", async (req: Request, res: Response) => {
 
     res.status(201).json(created);
   } catch (err: any) {
-    console.error("Error creating product:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -219,7 +217,6 @@ router.delete("/products/:id", async (req: Request, res: Response) => {
     res.json(rows[0]);
   } catch (err: any) {
     await client.query("ROLLBACK");
-    console.error("Error deleting product:", err);
     res.status(500).json({ error: "Internal server error" });
   } finally {
     client.release();

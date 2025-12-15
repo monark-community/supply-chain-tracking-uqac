@@ -3,9 +3,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import LoginButton from "./LoginButton";
-import LogoutButton from "./LogoutButton";
-
 // Type for the current user info returned from /api/auth/me
 type Me = { user?: { name?: string; email?: string } } | null;
 
@@ -16,7 +13,7 @@ type Me = { user?: { name?: string; email?: string } } | null;
  * @param dashboard - Optional boolean to hide certain links when in dashboard
  */
 export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
-  const [me, setMe] = useState<Me>(null);       // User data state
+  const [, setMe] = useState<Me>(null);       // User data state
   const [loading, setLoading] = useState(true); // Loading state while fetching user
 
   // Fetch the current authenticated user from the server
@@ -38,8 +35,6 @@ export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
       cancelled = true; // Cancel the async update on unmount
     };
   }, []);
-
-  const isAuth = !!me?.user?.email; // Boolean to check if user is logged in
 
   if (loading) return null; // Do not render navbar while loading
 

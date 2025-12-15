@@ -30,7 +30,6 @@ router.post("/contacts", async (req: Request, res: Response) => {
     );
     res.status(201).json(created);
   } catch (err: any) {
-    console.error("Error creating contact:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -42,7 +41,6 @@ router.delete("/contacts/:id", async (req: Request, res: Response) => {
     if (!rows || rows.length === 0) return res.status(404).json({ error: "Contact not found" });
     res.json(rows[0]);
   } catch (err: any) {
-    console.error("Error deleting contact:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

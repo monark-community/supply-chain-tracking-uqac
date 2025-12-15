@@ -11,7 +11,7 @@ chainproof/
 ├─ backend/    # Express backend
 └─ docker-compose.yml  # Orchestration for frontend + backend
 ```
-## 🚀 Quick Start (Docker)
+## 🚀 Quick Start (Docker Compose)
 
 
 ### 1. Prerequisites
@@ -34,8 +34,13 @@ docker-compose up --build
 ```
 This will:
 
-* Build and start the backend on [http://localhost:5000](http://localhost:5000)
-* Build and start the frontend on [http://localhost:3000](http://localhost:3000)
+- Backend: [http://localhost:5000](http://localhost:5000)
+- Frontend: [http://localhost:3000](http://localhost:3000)
+
+Environment in Docker:
+- Copy `.env.example` → `.env` at repo root and edit values.
+- `NEXT_PUBLIC_API_URL` should point to backend service, e.g. `http://backend:5000`.
+- Backend loads `.env` automatically; frontend receives `NEXT_PUBLIC_API_URL`.
 
 ### 4. Stop Services
 
@@ -49,7 +54,7 @@ docker-compose down
 docker-compose up --build
 ```
 
-## 🔧 Local Development (without Docker)
+## 🔧 Local Development (npm/pnpm)
 
 If you prefer running locally:
 
@@ -61,4 +66,13 @@ npm run dev   # Backend at [http://localhost:5000](http://localhost:5000)
 cd frontend
 npm install
 npm run dev   # Frontend at [http://localhost:3000](http://localhost:3000)
+
+Environment for local dev:
+- Copy `.env.example` → `.env.local` at repo root and edit values.
+- Frontend: define `NEXT_PUBLIC_API_URL=http://localhost:5000` in `.env.local`.
+- Backend: auto-loads `.env.local` when not in Docker; falls back to `.env`.
+
+Troubleshooting:
+- If frontend cannot reach backend, verify `NEXT_PUBLIC_API_URL` and that backend is running on the same port.
+- For Docker, ensure `.env` exists at repo root and `docker-compose` is run from that directory.
 ```

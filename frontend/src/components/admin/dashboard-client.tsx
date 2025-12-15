@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProducts, Product } from "@/context/products-context";
+import { API_URL } from "@/lib/env";
 
 // Define the shape of a transaction object
 interface Transaction {
@@ -64,12 +65,12 @@ export default function DashboardClient() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:5000/products?limit=50&offset=0");
+        const res = await fetch(`${API_URL}/products?limit=50&offset=0`);
         if (!res.ok) throw new Error("Failed to fetch products");
         const data: Product[] = await res.json();
         setProducts(data); // Update products in context
       } catch (err) {
-        console.error(err);
+        // Silently fail - products will remain empty
       } finally {
         setLoadingProducts(false); // Mark products as loaded
       }
@@ -81,12 +82,11 @@ export default function DashboardClient() {
   const fetchTransactions = async (productId: string) => {
     setLoadingTx((prev) => ({ ...prev, [productId]: true })); // Mark as loading
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${productId}/transactions`);
+      const res = await fetch(`${API_URL}/api/products/${productId}/transactions`);
       if (!res.ok) throw new Error("Failed to fetch transactions");
       const data: Transaction[] = await res.json();
       setTransactionsMap((prev) => ({ ...prev, [productId]: data })); // Save transactions
     } catch (err) {
-      console.error(err);
       setTransactionsMap((prev) => ({ ...prev, [productId]: [] })); // Fallback to empty array
     } finally {
       setLoadingTx((prev) => ({ ...prev, [productId]: false })); // Mark as done loading
@@ -113,14 +113,13 @@ export default function DashboardClient() {
   const fetchDetails = async (productId: string) => {
     setLoadingDetails((prev) => ({ ...prev, [productId]: true }));
     try {
-      const res = await fetch(`http://localhost:5000/products/${productId}`);
+      const res = await fetch(`${API_URL}/products/${productId}`);
       if (!res.ok) throw new Error("Failed to fetch product details");
       const data: Product = await res.json();
       setDetailsMap((prev) => ({ ...prev, [productId]: data }));
       // initialize qty input to current quantity
       setQtyInputs((prev) => ({ ...prev, [productId]: data.quantity != null ? Number(data.quantity) : "" }));
     } catch (err) {
-      console.error(err);
       setDetailsMap((prev) => ({ ...prev, [productId]: null }));
     } finally {
       setLoadingDetails((prev) => ({ ...prev, [productId]: false }));
@@ -213,7 +212,7 @@ export default function DashboardClient() {
                         notes: newProduct.notes ?? null,
                       };
                       if (newProduct.actors && newProduct.actors.length) body.actors = newProduct.actors;
-                      const res = await fetch(`http://localhost:5000/products`, {
+                      const res = await fetch(`${API_URL}/products`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(body),
@@ -224,7 +223,7 @@ export default function DashboardClient() {
                       setShowAddForm(false);
                       setNewProduct({});
                     } catch (err) {
-                      console.error(err);
+                      // Silently fail
                     } finally {
                       setCreatingProduct(false);
                     }
@@ -268,14 +267,14 @@ export default function DashboardClient() {
                       onClick={async () => {
                         if (!confirm("Supprimer ce produit ?")) return;
                         try {
-                          const res = await fetch(`http://localhost:5000/products/${product.id}`, { method: "DELETE" });
+                          const res = await fetch(`${API_URL}/products/${product.id}`, { method: "DELETE" });
                           if (!res.ok) throw new Error("Failed to delete product");
                           // remove from context
                           setProducts((prev) => prev.filter((p) => p.id !== product.id));
                           // close panels
                           setOpenPanel((prev) => ({ ...prev, [product.id]: undefined }));
                         } catch (err) {
-                          console.error(err);
+                          // Silently fail
                         }
                       }}
                     >
@@ -338,7 +337,7 @@ export default function DashboardClient() {
                               if (val === undefined || val === "") return;
                               setUpdatingQty((prev) => ({ ...prev, [product.id]: true }));
                               try {
-                                const res = await fetch(`http://localhost:5000/products/${product.id}`, {
+                                const res = await fetch(`${API_URL}/products/${product.id}`, {
                                   method: "PATCH",
                                   headers: { "Content-Type": "application/json" },
                                   body: JSON.stringify({ quantity: Number(val) }),
@@ -349,7 +348,7 @@ export default function DashboardClient() {
                                 setDetailsMap((prev) => ({ ...prev, [product.id]: updated }));
                                 setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, quantity: updated.quantity } : p)));
                               } catch (err) {
-                                console.error(err);
+                                // Silently fail
                               } finally {
                                 setUpdatingQty((prev) => ({ ...prev, [product.id]: false }));
                               }

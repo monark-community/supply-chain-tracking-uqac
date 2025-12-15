@@ -120,7 +120,6 @@ router.post("/actors", async (req: Request, res: Response) => {
     );
     res.status(201).json(created);
   } catch (err: any) {
-    console.error("Error creating actor:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -147,7 +146,6 @@ router.delete("/actors/:id", async (req: Request, res: Response) => {
     res.json(rows[0]);
   } catch (err: any) {
     await client.query("ROLLBACK");
-    console.error("Error deleting actor:", err);
     res.status(500).json({ error: "Internal server error" });
   } finally {
     client.release();

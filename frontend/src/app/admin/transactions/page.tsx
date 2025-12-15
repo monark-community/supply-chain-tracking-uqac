@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { API_URL } from "@/lib/env";
 
 export default function AdminTransactionsPage() {
   const [txs, setTxs] = useState<Array<any>>([]);
@@ -10,12 +11,11 @@ export default function AdminTransactionsPage() {
   const fetchTxs = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/product-transactions");
+      const res = await fetch(`${API_URL}/product-transactions`);
       if (!res.ok) throw new Error("Failed to fetch transactions");
       const data = await res.json();
       setTxs(data);
     } catch (err) {
-      console.error(err);
       setTxs([]);
     } finally {
       setLoading(false);

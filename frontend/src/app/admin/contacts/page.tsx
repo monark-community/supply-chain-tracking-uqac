@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { API_URL } from "@/lib/env";
 
 interface Contact {
   id?: string;
@@ -19,12 +20,11 @@ export default function AdminContactsPage() {
   const fetchContacts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/contacts");
+      const res = await fetch(`${API_URL}/contacts`);
       if (!res.ok) throw new Error("Failed to fetch contacts");
       const data = await res.json();
       setContacts(data);
     } catch (err) {
-      console.error(err);
       setContacts([]);
     } finally {
       setLoading(false);
@@ -36,7 +36,7 @@ export default function AdminContactsPage() {
   const createContact = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/contacts", {
+      const res = await fetch(`${API_URL}/contacts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -45,7 +45,6 @@ export default function AdminContactsPage() {
       setForm({ name: "", email: "", notes: "" });
       await fetchContacts();
     } catch (err) {
-      console.error(err);
       alert("Could not create contact");
     }
   };
@@ -53,11 +52,10 @@ export default function AdminContactsPage() {
   const deleteContact = async (id: string) => {
     if (!confirm("Delete this contact?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/contacts/${encodeURIComponent(id)}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/contacts/${encodeURIComponent(id)}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       await fetchContacts();
     } catch (err) {
-      console.error(err);
       alert("Could not delete contact");
     }
   };

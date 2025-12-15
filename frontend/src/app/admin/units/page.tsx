@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { API_URL } from "@/lib/env";
 
 export default function AdminUnitsPage() {
   const [units, setUnits] = useState<Array<any>>([]);
@@ -12,12 +13,11 @@ export default function AdminUnitsPage() {
   const fetchUnits = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/units");
+      const res = await fetch(`${API_URL}/units`);
       if (!res.ok) throw new Error("Failed to fetch units");
       const data = await res.json();
       setUnits(data);
     } catch (err) {
-      console.error(err);
       setUnits([]);
     } finally {
       setLoading(false);
@@ -29,7 +29,7 @@ export default function AdminUnitsPage() {
   const createUnit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/units", {
+      const res = await fetch(`${API_URL}/units`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: form.code, description: form.description }),
@@ -38,7 +38,6 @@ export default function AdminUnitsPage() {
       setForm({ code: "", description: "" });
       await fetchUnits();
     } catch (err) {
-      console.error(err);
       alert("Could not create unit");
     }
   };
@@ -46,11 +45,10 @@ export default function AdminUnitsPage() {
   const deleteUnit = async (code: string) => {
     if (!confirm("Delete this unit?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/units/${encodeURIComponent(code)}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/units/${encodeURIComponent(code)}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       await fetchUnits();
     } catch (err) {
-      console.error(err);
       alert("Could not delete unit");
     }
   };

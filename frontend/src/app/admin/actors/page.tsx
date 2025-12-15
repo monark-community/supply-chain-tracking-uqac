@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { API_URL } from "@/lib/env";
 
 export default function AdminActorsPage() {
   const [actors, setActors] = useState<Array<{ id: number; name: string }>>([]);
@@ -14,12 +15,11 @@ export default function AdminActorsPage() {
   const fetchActors = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/actors");
+      const res = await fetch(`${API_URL}/actors`);
       if (!res.ok) throw new Error("Failed to fetch actors");
       const data = await res.json();
       setActors(data);
     } catch (err) {
-      console.error(err);
       setActors([]);
     } finally {
       setLoading(false);
@@ -32,7 +32,7 @@ export default function AdminActorsPage() {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch("http://localhost:5000/actors", {
+      const res = await fetch(`${API_URL}/actors`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newName.trim() }),
@@ -42,7 +42,7 @@ export default function AdminActorsPage() {
       setActors((p) => [created, ...p]);
       setNewName("");
     } catch (err) {
-      console.error(err);
+      // Silently fail
     } finally {
       setCreating(false);
     }
@@ -51,11 +51,11 @@ export default function AdminActorsPage() {
   const deleteActor = async (id: number) => {
     if (!confirm("Supprimer cet acteur ?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/actors/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/actors/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete actor");
       setActors((p) => p.filter((a) => a.id !== id));
     } catch (err) {
-      console.error(err);
+      // Silently fail
     }
   };
 

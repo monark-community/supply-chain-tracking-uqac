@@ -30,7 +30,6 @@ router.post("/actor-categories", async (req: Request, res: Response) => {
     );
     res.status(201).json(created);
   } catch (err: any) {
-    console.error("Error creating actor category:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -42,7 +41,6 @@ router.delete("/actor-categories/:id", async (req: Request, res: Response) => {
     if (!rows || rows.length === 0) return res.status(404).json({ error: "Category not found" });
     res.json(rows[0]);
   } catch (err: any) {
-    console.error("Error deleting actor category:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

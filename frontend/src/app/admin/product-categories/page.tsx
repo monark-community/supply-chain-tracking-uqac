@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { API_URL } from "@/lib/env";
 
 export default function AdminProductCategoriesPage() {
   const [cats, setCats] = useState<Array<any>>([]);
@@ -12,12 +13,11 @@ export default function AdminProductCategoriesPage() {
   const fetchCats = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/product-categories");
+      const res = await fetch(`${API_URL}/product-categories`);
       if (!res.ok) throw new Error("Failed to fetch product categories");
       const data = await res.json();
       setCats(data);
     } catch (err) {
-      console.error(err);
       setCats([]);
     } finally {
       setLoading(false);
@@ -29,7 +29,7 @@ export default function AdminProductCategoriesPage() {
   const createCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/product-categories", {
+      const res = await fetch(`${API_URL}/product-categories`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -38,7 +38,6 @@ export default function AdminProductCategoriesPage() {
       setForm({ name: "", description: "" });
       await fetchCats();
     } catch (err) {
-      console.error(err);
       alert("Could not create category");
     }
   };
@@ -46,11 +45,10 @@ export default function AdminProductCategoriesPage() {
   const deleteCategory = async (id: string) => {
     if (!confirm("Delete this category?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/product-categories/${encodeURIComponent(id)}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/product-categories/${encodeURIComponent(id)}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       await fetchCats();
     } catch (err) {
-      console.error(err);
       alert("Could not delete category");
     }
   };
