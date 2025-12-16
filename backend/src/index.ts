@@ -26,7 +26,11 @@ app.use(express.json());
 // This allows the API to be accessed from different origins (like a frontend app)
 app.use(cors());
 
-// --- Swagger Documentation Setup ---
+// --- Server and Swagger Documentation Setup ---
+// Determine PORT and BASE_URL early so Swagger can use the actual base URL
+const PORT = process.env.PORT || 5000;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+
 // swaggerJsdoc generates OpenAPI spec from JSDoc comments in route files
 const swaggerOptions = {
   definition: {
@@ -36,7 +40,7 @@ const swaggerOptions = {
       version: "1.0.0",
       description: "API documentation for ChainProof backend",
     },
-    servers: [{ url: "http://localhost:5000" }], // Base server URL
+    servers: [{ url: BASE_URL }], // Base server URL (uses process.env.BASE_URL when available)
   },
   apis: ["./src/routes/*.ts"], // Files containing JSDoc comments for endpoints
 };
@@ -83,5 +87,4 @@ app.use("/", productTransactionsAdminRoute);
 app.use("/api/transaction", transactionRoute);
 
 // Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on ${BASE_URL}`));

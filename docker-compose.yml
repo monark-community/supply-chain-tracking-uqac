@@ -23,6 +23,7 @@ services:
   backend:
     build: ./backend
     restart: always
+    command: npm run dev
     ports:
       - "5000:5000"  # Access backend at localhost:5000
     env_file:
@@ -38,6 +39,7 @@ services:
   frontend:
     build: ./frontend
     restart: always
+    command: npm run dev
     env_file:
       - .env
     ports:
