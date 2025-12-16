@@ -31,7 +31,7 @@ export default function RetailPage() {
   return (
     <section className="container py-12">
       {/* Page heading */}
-      <h2 className="text-3xl font-bold mb-8">Retail Dashboard</h2>
+      <h2 className="text-3xl font-bold mb-8">Retail Admin</h2>
 
       {/* Form to confirm delivery */}
       <Card className="max-w-lg mb-10">

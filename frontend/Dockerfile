@@ -1,19 +1,20 @@
-# Frontend Dockerfile
-FROM node:20-alpine
-
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copier package.json et package-lock.json
+# Install deps and build
 COPY package*.json ./
-
-# Installer les dépendances
-RUN npm install
-
-# Copier le code source
+RUN npm ci
 COPY . .
+RUN npm run build
 
-# Exposer le port Next.js (3000)
+FROM node:20-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
 
-# Commande pour démarrer Next.js
-CMD ["npm", "run", "dev"]
+# Start Next.js in production mode
+CMD ["npm", "run", "start"]

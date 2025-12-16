@@ -38,7 +38,7 @@ export default function TransportPage() {
   return (
     <section className="container py-12">
       {/* Page heading */}
-      <h2 className="text-3xl font-bold mb-8">Transport Dashboard</h2>
+      <h2 className="text-3xl font-bold mb-8">Transport Admin</h2>
 
       {/* Card for adding new transport update */}
       <Card className="max-w-lg mb-10">

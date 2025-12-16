@@ -21,6 +21,9 @@ Backend will be available at:
 [http://localhost:5000](http://localhost:5000)
 (Host port 5000 → Container port 5000)
 
+Environment:
+- `.env` at repo root is loaded in Docker. Define `RPC_URL`, DB settings, etc.
+
 ### Stop
 
 ```
@@ -44,6 +47,9 @@ npm run dev
 
 Backend will run on:
 [http://localhost:5000](http://localhost:5000)
+
+Environment:
+- Backend auto-loads `.env.local` if present; else uses `.env`.
 
 ### 3. Build for Production
 

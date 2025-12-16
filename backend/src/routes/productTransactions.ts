@@ -6,14 +6,23 @@ import path from "path";
 import dotenv from "dotenv";
 import { q } from "../db";
 
-dotenv.config();
+function resolveEnvPath() {
+  const repoRoot = path.resolve(__dirname, "../../");
+  const envLocal = path.join(repoRoot, ".env.local");
+  const envDefault = path.join(repoRoot, ".env");
+  const inDocker = !!process.env.DOCKER || fs.existsSync("/.dockerenv");
+  if (!inDocker && fs.existsSync(envLocal)) return envLocal;
+  return envDefault;
+}
+
+dotenv.config({ path: resolveEnvPath() });
 
 const router = express.Router();
 
 // Load contract ABI
 const contractPath = path.resolve(
   __dirname,
-  "../../../mock-blockchain/artifacts/contracts/SupplyChain.sol/SupplyChain.json"
+  "../../contracts/SupplyChain.json"
 );
 const contractJson = JSON.parse(fs.readFileSync(contractPath, "utf-8"));
 
@@ -106,7 +115,6 @@ router.get("/:productId/transactions", async (req, res) => {
     }
     res.json(decodedTransactions.flat());
   } catch (err: any) {
-    console.error("Error fetching product transactions:", err);
     res.status(500).json({ error: err.message });
   }
 });

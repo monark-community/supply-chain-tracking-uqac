@@ -1,20 +1,25 @@
-# Use lightweight Node.js image
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
-# Set working directory inside the container
+# Create app directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json to install dependencies
+# Install all dependencies (including dev) and build
 COPY package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy all source code to the container
+# Copy source and build
 COPY . .
+RUN npm run build
 
-# Expose port 5000 (match app.listen)
+# Production image: prune dev deps for smaller image
+FROM node:20-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+
+# Expose port
 EXPOSE 5000
 
-# Start backend server
-CMD ["npm", "run", "dev"]
+# Start backend in production
+CMD ["npm", "start"]

@@ -3,9 +3,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import LoginButton from "./LoginButton";
-import LogoutButton from "./LogoutButton";
-
 // Type for the current user info returned from /api/auth/me
 type Me = { user?: { name?: string; email?: string } } | null;
 
@@ -16,7 +13,7 @@ type Me = { user?: { name?: string; email?: string } } | null;
  * @param dashboard - Optional boolean to hide certain links when in dashboard
  */
 export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
-  const [me, setMe] = useState<Me>(null);       // User data state
+  const [, setMe] = useState<Me>(null);       // User data state
   const [loading, setLoading] = useState(true); // Loading state while fetching user
 
   // Fetch the current authenticated user from the server
@@ -39,8 +36,6 @@ export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
     };
   }, []);
 
-  const isAuth = !!me?.email; // Boolean to check if user is logged in
-
   if (loading) return null; // Do not render navbar while loading
 
   return (
@@ -57,14 +52,11 @@ export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
           {!dashboard && (
             <>
               {/* Public site links */}
-              <Link href="/features">Features</Link>
+              <Link href="#features">Features</Link>
               <Link href="/how-it-works">How It Works</Link>
               <Link href="/scan-qr">Scan QR</Link>
-              {!isAuth && <LoginButton />} {/* Show login if not authenticated */}
             </>
           )}
-
-          {isAuth && <LogoutButton />} {/* Show logout if authenticated */}
         </nav>
       </div>
     </header>

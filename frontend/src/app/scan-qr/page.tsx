@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Scanner, IDetectedBarcode } from "@yudiel/react-qr-scanner"
+import { API_URL } from "@/lib/env"
 
 // Transaction interface representing each product transaction
 interface Transaction {
@@ -36,12 +37,11 @@ export default function ScanQR() {
   const fetchTransactions = async (productId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${productId}/transactions`)
+      const res = await fetch(`${API_URL}/api/products/${productId}/transactions`)
       if (!res.ok) throw new Error("No transactions found")
       const data: Transaction[] = await res.json()
       setTransactions(data.flat()) // Flatten in case of nested arrays
     } catch (err) {
-      console.error(err)
       setTransactions([]) // Reset if error occurs
     } finally {
       setLoading(false)
@@ -104,7 +104,6 @@ export default function ScanQR() {
                   fetchTransactions(detected[0].rawValue) // Fetch transactions
                 }
               }}
-              onError={(err) => console.error("Scanner error:", err)}
             />
           </div>
         )}

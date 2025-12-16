@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { q } from "../db";
+import { q, pool } from "../db";
 
 const router = Router();
 
@@ -104,3 +104,50 @@ router.get("/actors/:id", async (req: Request, res: Response) => {
 });
 
 export default router;
+
+/**
+ * POST /actors
+ * Create a simple actor (name required)
+ */
+router.post("/actors", async (req: Request, res: Response) => {
+  const { name, description, category_id } = req.body;
+  if (!name) return res.status(400).json({ error: "Missing actor name" });
+  try {
+    const params: any[] = [name, description ?? null, category_id ?? null];
+    const [created] = await q(
+      `INSERT INTO actors (name, description, category_id) VALUES ($1,$2,$3) RETURNING id, name, description, category_id`,
+      params
+    );
+    res.status(201).json(created);
+  } catch (err: any) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * DELETE /actors/:id
+ * Delete actor and its relations (actor_products, actor_contacts)
+ */
+router.delete("/actors/:id", async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    // remove relations
+    await client.query(`DELETE FROM actor_products WHERE actor_id = $1`, [id]);
+    await client.query(`DELETE FROM actor_contacts WHERE actor_id = $1`, [id]);
+    // delete actor
+    const { rows } = await client.query(`DELETE FROM actors WHERE id = $1 RETURNING id, name, description, category_id`, [id]);
+    if (!rows || rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Actor not found" });
+    }
+    await client.query("COMMIT");
+    res.json(rows[0]);
+  } catch (err: any) {
+    await client.query("ROLLBACK");
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    client.release();
+  }
+});
