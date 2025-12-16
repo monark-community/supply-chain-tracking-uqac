@@ -265,7 +265,7 @@ export default function DashboardClient() {
                     <Button
                       className="bg-red-600 hover:bg-red-700"
                       onClick={async () => {
-                        if (!confirm("Supprimer ce produit ?")) return;
+                        if (!confirm("Delete this product?")) return;
                         try {
                           const res = await fetch(`${API_URL}/products/${product.id}`, { method: "DELETE" });
                           if (!res.ok) throw new Error("Failed to delete product");
@@ -278,7 +278,7 @@ export default function DashboardClient() {
                         }
                       }}
                     >
-                      Supprimer
+                      Delete
                     </Button>
                   </div>
                 </div>
