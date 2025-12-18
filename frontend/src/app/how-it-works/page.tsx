@@ -41,7 +41,7 @@ export default function HowItWorks() {
   return (
     <section className="container py-16">
       {/* Section heading */}
-      <h2 className="text-3xl font-bold text-center mb-12">How It Works (demo)</h2>
+      <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
 
       {/* Grid layout for steps — descriptive cards only */}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">

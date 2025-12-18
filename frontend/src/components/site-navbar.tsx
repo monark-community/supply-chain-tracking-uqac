@@ -2,9 +2,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-// Type for the current user info returned from /api/auth/me
-type Me = { user?: { name?: string; email?: string } } | null;
 
 /**
  * SiteNavbar component renders the top navigation bar.
@@ -13,30 +10,7 @@ type Me = { user?: { name?: string; email?: string } } | null;
  * @param dashboard - Optional boolean to hide certain links when in dashboard
  */
 export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
-  const [, setMe] = useState<Me>(null);       // User data state
-  const [loading, setLoading] = useState(true); // Loading state while fetching user
-
-  // Fetch the current authenticated user from the server
-  useEffect(() => {
-    let cancelled = false; // To prevent state update after unmount
-    (async () => {
-      try {
-        const res = await fetch("/api/auth/me", { cache: "no-store" }); // Get user info
-        const data = res.ok ? await res.json() : null;
-        if (!cancelled) setMe(data);
-      } catch {
-        if (!cancelled) setMe(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true; // Cancel the async update on unmount
-    };
-  }, []);
-
-  if (loading) return null; // Do not render navbar while loading
+  // No pre-check: render the navbar immediately (remove initial /api/auth/me verification)
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-bg/60 backdrop-blur">
@@ -52,7 +26,7 @@ export function SiteNavbar({ dashboard = false }: { dashboard?: boolean }) {
           {!dashboard && (
             <>
               {/* Public site links */}
-              <Link href="#features">Features</Link>
+              <Link href="/#features">Features</Link>
               <Link href="/how-it-works">How It Works</Link>
               <Link href="/scan-qr">Scan QR</Link>
             </>
