@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(cors());
 
 // Server config
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
 
 // Swagger / OpenAPI configuration
