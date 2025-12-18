@@ -20,7 +20,13 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 Environment:
 - Next.js loads `.env.local` for local dev and `.env` in production.
-- Define `NEXT_PUBLIC_API_URL` pointing to the backend (e.g., `http://localhost:5000`).
+- Define `NEXT_PUBLIC_API_URL` pointing to the backend and avoid hardcoding URLs in source.
+
+Example `.env.local` for development:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
 
 ## Learn More
 

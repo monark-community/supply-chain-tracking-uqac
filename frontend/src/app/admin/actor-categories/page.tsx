@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { API_URL } from "@/lib/env";
 
 export default function AdminActorCategoriesPage() {
   const [cats, setCats] = useState<Array<any>>([]);
@@ -12,7 +13,7 @@ export default function AdminActorCategoriesPage() {
   const fetchCats = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/actor-categories");
+      const res = await fetch(`${API_URL}/actor-categories`);
       if (!res.ok) throw new Error("Failed to fetch actor categories");
       const data = await res.json();
       setCats(data);
@@ -29,7 +30,7 @@ export default function AdminActorCategoriesPage() {
   const createCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/actor-categories", {
+      const res = await fetch(`${API_URL}/actor-categories`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -46,7 +47,7 @@ export default function AdminActorCategoriesPage() {
   const deleteCategory = async (id: string) => {
     if (!confirm("Delete this category?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/actor-categories/${encodeURIComponent(id)}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/actor-categories/${encodeURIComponent(id)}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       await fetchCats();
     } catch (err) {
