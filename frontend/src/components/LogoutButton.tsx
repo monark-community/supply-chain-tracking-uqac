@@ -1,16 +1,12 @@
 "use client";
 
-import Link from "next/link";
-
 export default function LoginButton() {
   const handleClick = () => {
-    // petit délai pour laisser Auth0 rediriger, puis on recharge la page
-    setTimeout(() => window.location.reload(), 1000);
+    window.location.href = "/api/auth/logout";
   };
 
   return (
-    <Link
-      href="/api/auth/logout"
+    <button
       onClick={handleClick}
       style={{
         display: "inline-block",
@@ -19,9 +15,11 @@ export default function LoginButton() {
         backgroundColor: "#2563eb",
         color: "#fff",
         textDecoration: "none",
+        border: "none",
+        cursor: "pointer",
       }}
     >
       Logout
-    </Link>
+    </button>
   );
 }
