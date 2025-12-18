@@ -3,7 +3,7 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 
-// Import route modules
+// Routes
 import healthRoute from "./routes/health";
 import traceRoute from "./routes/trace";
 import productsRoute from "./routes/products";
@@ -16,75 +16,72 @@ import actorCategoriesRoute from "./routes/actorCategories";
 import unitsRoute from "./routes/units";
 import productTransactionsAdminRoute from "./routes/productTransactionsAdmin";
 
-// Create an Express application
+// Create Express app
 const app = express();
 
-// Middleware to parse incoming JSON requests
+// Parse JSON bodies
 app.use(express.json());
 
-// ⚡ Enable CORS (Cross-Origin Resource Sharing)
-// This allows the API to be accessed from different origins (like a frontend app)
+// Enable CORS (frontend → backend)
 app.use(cors());
 
-// --- Server and Swagger Documentation Setup ---
-// Determine PORT and BASE_URL early so Swagger can use the actual base URL
+// Server config
 const PORT = process.env.PORT || 5000;
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
 
-// swaggerJsdoc generates OpenAPI spec from JSDoc comments in route files
+// Swagger / OpenAPI configuration
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
       title: "ChainProof API",
       version: "1.0.0",
-      description: "API documentation for ChainProof backend",
+      description: "Backend API for ChainProof",
     },
-    servers: [{ url: BASE_URL }], // Base server URL (uses process.env.BASE_URL when available)
+    servers: [
+      {
+        url: BASE_URL,
+      },
+    ],
   },
-  apis: ["./src/routes/*.ts"], // Files containing JSDoc comments for endpoints
+  apis: ["./src/routes/*.ts"],
 };
+
+// Generate OpenAPI spec
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-// Serve Swagger UI at /swagger endpoint
+// Swagger UI endpoint
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// --- API Routes ---
 // Root endpoint
-app.get("/", (_req, res) => res.send("Welcome to the ChainProof backend service!"));
+app.get("/", (_req, res) => {
+  res.send("ChainProof backend is running");
+});
 
-// Health check route
+// Health check
 app.use("/", healthRoute);
 
-// Trace route for logging or monitoring
+// Trace / logging
 app.use("/", traceRoute);
 
-// Product-related routes
+// Business routes
 app.use("/", productsRoute);
-
-// Actor-related routes
 app.use("/", actorsRoute);
-
-// Contacts
 app.use("/", contactsRoute);
-
-// Product categories
 app.use("/", productCategoriesRoute);
-
-// Actor categories
 app.use("/", actorCategoriesRoute);
-
-// Units
 app.use("/", unitsRoute);
 
-// Product transaction routes
+// Product transactions
 app.use("/api/products", productTransactionsRoute);
 
-// Admin product transactions listing
+// Admin routes
 app.use("/", productTransactionsAdminRoute);
 
-// Transaction routes
+// Transactions
 app.use("/api/transaction", transactionRoute);
 
-// Start the server
-app.listen(PORT, () => console.log(`Backend running on ${BASE_URL}`));
+// Start server (Render requires 0.0.0.0)
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend running on ${BASE_URL}`);
+});
