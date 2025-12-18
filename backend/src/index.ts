@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import fs from "fs";
 
 // Routes
 import healthRoute from "./routes/health";
@@ -30,6 +31,9 @@ const PORT = Number(process.env.PORT) || 5000;
 const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
 
 // Swagger / OpenAPI configuration
+const isProd = fs.existsSync("./dist");
+const routePath = isProd ? "./dist/routes/*.js" : "./src/routes/*.ts";
+
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -44,7 +48,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./src/routes/*.ts"],
+  apis: [routePath],
 };
 
 // Generate OpenAPI spec
